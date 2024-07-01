@@ -5,6 +5,7 @@ const cover = window.document.getElementById("cover");
 const play = window.document.getElementById("play");
 const next = window.document.getElementById("next");
 const previous = window.document.getElementById("previous");
+const likeButton = window.document.getElementById("like");
 const currentProgress = window.document.getElementById("current-progress");
 const progressContainer = window.document.getElementById("progress-container");
 const shuffleButton = window.document.getElementById("shuffle");
@@ -15,37 +16,43 @@ const totalTime = window.document.getElementById("total-time");
 const scarboroughFair = {
     songName : "Scarborough Fair",
     artist : "Aurora",
-    file : "Aurora - Scarborough Fair"
+    file : "Aurora - Scarborough Fair",
+    liked: false
 }
 
 const youAreTheReason = {
     songName : "You Are The Reason",
     artist : "Calum Scott",
     file : "Calum Scott - You Are The Reason",
+    liked: false
 }
 
 const loveMeLikeYouDo = {
     songName : "Love Me Like You Do",
     artist : "Ellie Goulding",
     file : "Ellie Goulding - Love Me Like You Do",
+    liked: false
 }
 
 const minefields = {
     songName : "Minefields",
     artist : "Faouzia & John Legend",
     file : "Faouzia & John Legend - Minefields",
+    liked: false
 }
 
 const allOfMe = {
     songName : "All of Me",
     artist : "John Legend",
     file : "John Legend - All of Me",
+    liked: false
 }
 
 const someoneYouLoved = {
     songName : "Someone You Loved",
     artist : "Lewis Capaldi",
     file : "Lewis Capaldi - Someone You Loved",
+    liked: false
 }
 
 
@@ -53,7 +60,7 @@ let isPlaying = false;
 let isShuffle = false;
 let repeatOn = false
 
-const originalPlaylist = [scarboroughFair, youAreTheReason, loveMeLikeYouDo, minefields, allOfMe, someoneYouLoved]
+const originalPlaylist = JSON.parse(localStorage.getItem("playlist")) ?? [scarboroughFair, youAreTheReason, loveMeLikeYouDo, minefields, allOfMe, someoneYouLoved]
 let sortedPlaylist = [...originalPlaylist];
 
 let index = 0;
@@ -78,11 +85,23 @@ function playPauseDecider() {
     }
 }
 
+function likeButtonRender() {
+    if(sortedPlaylist[index].liked === true) {
+        likeButton.querySelector(".bi").classList.replace("bi-heart", "bi-heart-fill");
+        likeButton.classList.add("button-active");
+    } else {
+        likeButton.querySelector(".bi").classList.replace("bi-heart-fill", "bi-heart");
+        likeButton.classList.remove("button-active");
+
+    }
+}
+
 function initializeSong() {
     cover.src = `images/${sortedPlaylist[index].file}.jpg`;
     song.src = `songs/${sortedPlaylist[index].file}.mp3`;
     songName.innerHTML = sortedPlaylist[index].songName;
     bandName.innerHTML = sortedPlaylist[index].artist;
+    likeButtonRender();
 }
 
 function previousSong() {
@@ -174,6 +193,16 @@ function updateTotalTime() {
     totalTime.innerHTML = toHHMMSS(song.duration);
 }
 
+function likeButtonClicked() {
+    if(sortedPlaylist[index].liked === false) {
+        sortedPlaylist[index].liked = true;
+    } else {
+        sortedPlaylist[index].liked = false;
+    }
+    likeButtonRender();
+    localStorage.setItem("playlist", JSON.stringify(originalPlaylist));
+}
+
 initializeSong();
 
 play.addEventListener("click", playPauseDecider);
@@ -185,3 +214,4 @@ song.addEventListener("loadedmetadata", updateTotalTime)
 progressContainer.addEventListener("click", jumpTo);
 shuffleButton.addEventListener("click", shuffleButtonClicked);
 repeatButton.addEventListener("click", repeatButtonClicked);
+likeButton.addEventListener("click", likeButtonClicked);
