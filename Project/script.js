@@ -8,6 +8,9 @@ const previous = window.document.getElementById("previous");
 const currentProgress = window.document.getElementById("current-progress");
 const progressContainer = window.document.getElementById("progress-container");
 const shuffleButton = window.document.getElementById("shuffle");
+const repeatButton = window.document.getElementById("repeat");
+const songTime = window.document.getElementById("song-time");
+const totalTime = window.document.getElementById("total-time");
 
 const scarboroughFair = {
     songName : "Scarborough Fair",
@@ -48,6 +51,7 @@ const someoneYouLoved = {
 
 let isPlaying = false;
 let isShuffle = false;
+let repeatOn = false
 
 const originalPlaylist = [scarboroughFair, youAreTheReason, loveMeLikeYouDo, minefields, allOfMe, someoneYouLoved]
 let sortedPlaylist = [...originalPlaylist];
@@ -102,9 +106,10 @@ function nextSong() {
 }
 
 // Função que carrega a barra de progresso da música
-function upadateProgressBar() {
+function upadateProgress() {
     const barWidth = (song.currentTime / song.duration) * 100;
     currentProgress.style.setProperty("--progress", `${barWidth}%`);
+    songTime.innerHTML = toHHMMSS(song.currentTime);
 }
 
 // Função que pula a barra de progresso da música
@@ -127,16 +132,46 @@ function shuffleArray(preShuffleArray) {
     }
 }
 
-function shuffleButtonClick() {
+function shuffleButtonClicked() {
     if(isShuffle === false) {
         isShuffle = true;
         shuffleArray(sortedPlaylist);
         shuffleButton.classList.add("button-active");
     } else {
         isShuffle = false;
-        sortedPlaylist = [...originalPlaylist]
+        sortedPlaylist = [...originalPlaylist];
         shuffleButton.classList.remove("button-active");
     }
+}
+
+function repeatButtonClicked() {
+    if(repeatOn === false) {
+        repeatOn = true;
+        repeatButton.classList.add("button-active");
+    } else {
+        repeatOn = false;
+        repeatButton.classList.remove("button-active");
+    }
+}
+
+function nextOrRepeat() {
+    if(repeatOn == false) {
+        nextSong();
+    } else {
+        playSong();
+    }
+}
+
+function toHHMMSS(originalNumber) {
+    let hours = Math.floor(originalNumber / 3600);
+    let min = Math.floor((originalNumber - hours * 3600) / 60);
+    let secs =  Math.floor(originalNumber - hours * 3600 - min * 60);
+
+    return `${hours.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+function updateTotalTime() {
+    totalTime.innerHTML = toHHMMSS(song.duration);
 }
 
 initializeSong();
@@ -144,6 +179,9 @@ initializeSong();
 play.addEventListener("click", playPauseDecider);
 previous.addEventListener("click", previousSong);
 next.addEventListener("click", nextSong);
-song.addEventListener("timeupdate", upadateProgressBar);
+song.addEventListener("timeupdate", upadateProgress);
+song.addEventListener("ended", nextOrRepeat);
+song.addEventListener("loadedmetadata", updateTotalTime)
 progressContainer.addEventListener("click", jumpTo);
-shuffleButton.addEventListener("click", shuffleButtonClick);
+shuffleButton.addEventListener("click", shuffleButtonClicked);
+repeatButton.addEventListener("click", repeatButtonClicked);
